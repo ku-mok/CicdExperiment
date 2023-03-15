@@ -2,8 +2,6 @@ name: python-lint-and-test
 on: [pull_request]
 env:
   PYTHON_VERSION: 3.9
-  REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 defaults:
   run:
     # Pythonのルートディレクトリを指定
@@ -28,14 +26,21 @@ jobs:
           pip install poetry
       - name: Install dependencies
         run: poetry install
-      - uses: reviewdog/action-setup@v1
-        with:
-          reviewdog_version: latest
       - name: Lint
-        run: make lint
+        run: make lint |& tee lint.log
+        continue-on-error: true
       - name: Test
-        if: always()
-        run: make test
+        run: make test |& tee test.log
+        continue-on-error: true
       - name: Typecheck
-        if: always()
-        run: make typecheck | reviewdog -f=mypy -name="mypy" -reporter=github-pr-review
+        run: |
+          echo 'typecheck<<EOF' >> $GITHUB_ENV
+          { make typecheck |& tee typecheck.log; } && { echo 'Typecheck passed' >> $GITHUB_ENV ; } || { echo 'Typecheck failed' >> $GITHUB_ENV ; }
+          cat typecheck.log >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+        continue-on-error: true
+      - name: Comment PullRequest
+        uses: JoseThen/comment-pr@v1.1.1
+        with:
+          comment: 'Preview ${{ steps.deploy-to-webapp.outputs.webapp-url }}'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

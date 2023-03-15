@@ -1,7 +1,7 @@
 from src.sample import add
 
 
-def test_足し算が出来る() -> None:
+def test_足し算が出来る():
     # Arrange
     left = 1
     right = 2
@@ -12,5 +12,5 @@ def test_足し算が出来る() -> None:
     assert actual == expected
 
 
-def test_意図的に失敗する() -> None:
+def test_意図的に失敗する():
     assert False

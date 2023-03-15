@@ -44,30 +44,21 @@ jobs:
         run: |
          set -o pipefail
          make typecheck | tee -a typecheck.log
-      - name: Comment to pull request if lint or test failed
+      # Testが失敗した場合にコメントを返す
+      - name: Comment to pull request if test failed
         uses: actions/github-script@v5
-        if: steps.lint.outcome == 'failure' || steps.test.outcome == 'failure' || steps.typecheck.outcome == 'failure'
+        if: steps.test.outcome == 'failure' 
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const path = require('path');
             const workingDir = process.env.WORK_DIR || process.cwd();
-            const lintLog = fs.readFileSync(path.join(workingDir, 'lint.log'), 'utf8');
             const testLog = fs.readFileSync(path.join(workingDir, 'test.log'), 'utf8');
-            const typecheckLog = fs.readFileSync(path.join(workingDir, 'typecheck.log'), 'utf8');
             const message = `
-            ## Lint
-            \`\`\`
-            ${lintLog}
-            \`\`\`
-            ## Test
+            ## Test Failed
             \`\`\`
             ${testLog}
-            \`\`\`
-            ## Typecheck
-            \`\`\`
-            ${typecheckLog}
             \`\`\`
             `;
             github.rest.issues.createComment({
@@ -76,3 +67,56 @@ jobs:
               repo: context.repo.repo,
               body: message,
             });
+      # Lintが失敗した場合にコメントを返す
+      - name: Comment to pull request if lint failed
+        uses: actions/github-script@v5
+        if: steps.lint.outcome == 'failure' 
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const workingDir = process.env.WORK_DIR || process.cwd();
+            const lintLog = fs.readFileSync(path.join(workingDir, 'lint.log'), 'utf8');
+            const message = `
+            ## Lint Failed
+            \`\`\`
+            ${lintLog}
+            \`\`\`
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });
+      # TypeCheckが失敗した場合にコメントを返す
+      - name: Comment to pull request if typech failed
+        uses: actions/github-script@v5
+        if: steps.typecheck.outcome == 'failure' 
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const workingDir = process.env.WORK_DIR || process.cwd();
+            const typechecklog = fs.readFileSync(path.join(workingDir, 'typecheck.log'), 'utf8');
+            const message = `
+            ## Test Failed
+            \`\`\`
+            ${typeChecklog}
+            \`\`\`
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });
+      # Lintが失敗した場合にコメントを返す
+      # Lint/Typecheck/Testのいずれかが失敗した場合にエラーを返す
+      - name: Error handling
+        if: steps.lint.outcome == 'failure' || steps.test.outcome == 'failure' || steps.typecheck.outcome == 'failure'
+        run: |
+          echo "Error handling"
+          exit 1

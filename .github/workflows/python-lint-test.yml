@@ -27,20 +27,44 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Lint
-        run: make lint |& tee lint.log
+        id: lint
+        run: make lint |& tee -a lint.log
         continue-on-error: true
       - name: Test
-        run: make test |& tee test.log
+        id: test
+        run: make test |& tee -a test.log
         continue-on-error: true
       - name: Typecheck
-        run: |
-          echo 'typecheck<<EOF' >> $GITHUB_ENV
-          { make typecheck |& tee typecheck.log; } && { echo 'Typecheck passed' >> $GITHUB_ENV ; } || { echo 'Typecheck failed' >> $GITHUB_ENV ; }
-          cat typecheck.log >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+        id: typecheck
+        run: make typecheck |& tee -a typecheck.log
         continue-on-error: true
-      - name: Comment PullRequest
-        uses: JoseThen/comment-pr@v1.1.1
+      - name: Comment to pull request if lint or test failed
+        uses: actions/github-script@v5
+        if: steps.lint.outcome == 'failure' || steps.test.outcome == 'failure' || steps.typecheck.outcome == 'failure'
         with:
-          comment: 'Preview ${{ steps.deploy-to-webapp.outputs.webapp-url }}'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const lintLog = fs.readFileSync('lint.log', 'utf8');
+            const testLog = fs.readFileSync('test.log', 'utf8');
+            const typecheckLog = fs.readFileSync('typecheck.log', 'utf8');
+            const message = `
+            ## Lint
+            \`\`\`
+            ${lintLog}
+            \`\`\`
+            ## Test
+            \`\`\`
+            ${testLog}
+            \`\`\`
+            ## Typecheck
+            \`\`\`
+            ${typecheckLog}
+            \`\`\`
+            `;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });

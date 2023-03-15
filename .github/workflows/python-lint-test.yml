@@ -28,13 +28,13 @@ jobs:
         run: poetry install
       - name: Lint
         id: lint
-        run: make lint |& tee -a lint.log
+        run: make lint | tee lint.log
       - name: Test
         id: test
-        run: make test |& tee -a test.log
+        run: make test | tee -a test.log
       - name: Typecheck
         id: typecheck
-        run: make typecheck |& tee -a typecheck.log
+        run: make typecheck | tee -a typecheck.log
       - name: Comment to pull request if lint or test failed
         uses: actions/github-script@v5
         if: steps.lint.outcome == 'failure' || steps.test.outcome == 'failure' || steps.typecheck.outcome == 'failure'

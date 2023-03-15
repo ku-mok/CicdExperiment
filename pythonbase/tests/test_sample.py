@@ -10,3 +10,7 @@ def test_足し算が出来る():
     actual = add(left, right)
     # Assert
     assert actual == expected
+
+
+def test_意図的に失敗する():
+    assert False

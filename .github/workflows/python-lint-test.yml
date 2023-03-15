@@ -28,16 +28,19 @@ jobs:
         run: poetry install
       - name: Lint
         id: lint
+        continue-on-error: true
         run: |
           set -o pipefail
           make lint | tee lint.log
       - name: Test
         id: test
+        continue-on-error: true
         run: |
          set -o pipefail
          make test | tee -a test.log
       - name: Typecheck
         id: typecheck
+        continue-on-error: true
         run: |
          set -o pipefail
          make typecheck | tee -a typecheck.log

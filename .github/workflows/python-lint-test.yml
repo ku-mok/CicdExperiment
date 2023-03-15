@@ -29,15 +29,12 @@ jobs:
       - name: Lint
         id: lint
         run: make lint |& tee -a lint.log
-        continue-on-error: true
       - name: Test
         id: test
         run: make test |& tee -a test.log
-        continue-on-error: true
       - name: Typecheck
         id: typecheck
         run: make typecheck |& tee -a typecheck.log
-        continue-on-error: true
       - name: Comment to pull request if lint or test failed
         uses: actions/github-script@v5
         if: steps.lint.outcome == 'failure' || steps.test.outcome == 'failure' || steps.typecheck.outcome == 'failure'

@@ -102,7 +102,7 @@ jobs:
             const workingDir = process.env.WORK_DIR || process.cwd();
             const typecheckLog = fs.readFileSync(path.join(workingDir, 'typecheck.log'), 'utf8');
             const message = `
-            ## Test Failed
+            ## TypeCheck Failed
             \`\`\`
             ${typecheckLog}
             \`\`\`

@@ -35,6 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     steps:
+      - uses: mxschmitt/action-tmate@v3
       - uses: actions/checkout@v2
       - name: Lint
         run: make lint

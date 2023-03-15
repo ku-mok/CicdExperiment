@@ -5,7 +5,7 @@ env:
   WORK_DIR: ./pythonbase
 defaults:
   run:
-    working-directory: ${{ env.WORK_DIR }}
+    working-directory: ./pythonbase
 jobs:
   python-test-and-lint:
     runs-on: ubuntu-latest

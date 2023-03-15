@@ -100,11 +100,11 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const workingDir = process.env.WORK_DIR || process.cwd();
-            const typechecklog = fs.readFileSync(path.join(workingDir, 'typecheck.log'), 'utf8');
+            const typecheckLog = fs.readFileSync(path.join(workingDir, 'typecheck.log'), 'utf8');
             const message = `
             ## Test Failed
             \`\`\`
-            ${typeChecklog}
+            ${typecheckLog}
             \`\`\`
             `;
             github.rest.issues.createComment({

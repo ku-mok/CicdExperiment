@@ -2,12 +2,12 @@ name: python-lint-and-test
 on: [pull_request]
 env:
   PYTHON_VERSION: 3.9
+  WORK_DIR: ./pythonbase
 defaults:
   run:
-    # Pythonのルートディレクトリを指定
-    working-directory: ./pythonbase
+    working-directory: ${{ env.WORK_DIR }}
 jobs:
-  test-and-lint:
+  python-test-and-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -51,9 +51,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const lintLog = fs.readFileSync('lint.log', 'utf8');
-            const testLog = fs.readFileSync('test.log', 'utf8');
-            const typecheckLog = fs.readFileSync('typecheck.log', 'utf8');
+            const path = require('path');
+            const workingDir = process.env.WORK_DIR || process.cwd();
+            const lintLog = fs.readFileSync(path.join(workingDir, 'lint.log'), 'utf8');
+            const testLog = fs.readFileSync(path.join(workingDir, 'test.log'), 'utf8');
+            const typecheckLog = fs.readFileSync(path.join(workingDir, 'typecheck.log'), 'utf8');
             const message = `
             ## Lint
             \`\`\`
